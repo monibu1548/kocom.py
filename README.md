@@ -7,7 +7,7 @@ Kocom Wallpad with RS485
 
 ## Installation
 
-1. 홈어시스턴트의 Hass.io > ADD-ON STORE에서 Add new repository by URL에 https://github.com/clipman/kocom.py 를 입력한 다음 ADD 버튼을 누릅니다.
+1. 홈어시스턴트의 Hass.io > ADD-ON STORE에서 Add new repository by URL에 https://github.com/monibu1548/kocom.py 를 입력한 다음 ADD 버튼을 누릅니다.
 2. ADD-ON STORE 페이지 하단에서 "Kocom Wallpad with RS485" 클릭합니다.
 3. "INSTALL" 버튼을 누르면 애드온이 설치됩니다. 최대 약 10분 정도 소요. 
 4. INSTALL 버튼위에 설치 애니메이션이 동작하는데 이것이 멈추더라도 REBUILD, START 버튼이 나타나지 않는 경우가 있습니다.
@@ -21,6 +21,7 @@ share/kocom/ 폴더에 있는 파일을 알맞게 수정하신 다음에
 애드온을 Start 하시면 이후부터는 수정된 파일을 적용합니다.
 
 ## Change log
+(2024-08-18 수정) light 제어 로직 변경
 
 (2024-03-12 수정) paho-mqtt-2.0.0 대응
 
