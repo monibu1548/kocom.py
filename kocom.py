@@ -273,6 +273,7 @@ def parse(hex_data):
             'seq':seq_t_dic.get(seq_h), 
             'dest':device_t_dic.get(dest_h[:2]),
             'dest_subid':str(int(dest_h[2:4], 16)),
+            'dest_room':room_t_dic.get(dest_h[2:4]),
             'src':device_t_dic.get(src_h[:2]),
             'src_subid':str(int(src_h[2:4], 16)),
             'src_room':room_t_dic.get(src_h[2:4]),
@@ -519,8 +520,8 @@ def packet_processor(p):
         elif p['dest'] == 'light' and p['cmd']=='state':
         #elif p['src'] == 'light' and p['cmd']=='state':
             state = light_parse(p['value'])
-            logtxt='[MQTT publish|light] data[{}]'.format(state)
-            mqttc.publish("kocom/{}/light/state".format(p['src_room']), json.dumps(state))
+            logtxt='[MQTT publish|light] room[{}] data[{}]'.format(p['dest_room'], state)
+            mqttc.publish("kocom/{}/light/state".format(p['dest_room']), json.dumps(state))
         elif p['dest'] == 'fan' and p['cmd']=='state':
         #elif p['src'] == 'fan' and p['cmd']=='state':
             state = fan_parse(p['value'])
@@ -658,7 +659,7 @@ def publish_discovery(dev, sub=''):
                     'sw': SW_VERSION
                 }
             }
-            logtxt='[MQTT Discovery|{}{}] data[{}]'.format(dev, num, topic)
+            logtxt='[MQTT Discovery|{}{}_{}] data[{}]'.format(dev, num, sub, topic)
             mqttc.publish(topic, json.dumps(payload))
             if logtxt != "" and config.get('Log', 'show_mqtt_publish') == 'True':
                 logging.info(logtxt)
