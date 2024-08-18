@@ -46,7 +46,7 @@ type_h_dic = {v: k for k, v in type_t_dic.items()}
 seq_h_dic = {v: k for k, v in seq_t_dic.items()}
 device_h_dic = {v: k for k, v in device_t_dic.items()}
 cmd_h_dic = {v: k for k, v in cmd_t_dic.items()}
-room_h_dic = {'livingroom':'00', 'myhome':'00', 'bedroom':'01', 'room1':'02', 'room2':'03'}
+room_h_dic = {'livingroom':'00', 'bedroom':'01', 'room1':'02', 'room2':'03'}
 
 # mqtt functions ----------------------------
 
@@ -267,17 +267,19 @@ def parse(hex_data):
     payload_h = hex_data[18:36]
     cmd = cmd_t_dic.get(cmd_h)
 
-    ret = { 'header_h':header_h, 'type_h':type_h, 'seq_h':seq_h, 'monitor_h':monitor_h, 'dest_h':dest_h, 'src_h':src_h, 'cmd_h':cmd_h, 
+    ret = { 'header_h':header_h, 'type_h':type_h, 'seq_h':seq_h, 'monitor_h':monitor_h, 'dest_h':dest_h, 'src_h':src_h, 'cmd_h':cmd_h,
             'value_h':value_h, 'chksum_h':chksum_h, 'trailer_h':trailer_h, 'data_h':data_h, 'payload_h':payload_h,
             'type':type_t_dic.get(type_h),
-            'seq':seq_t_dic.get(seq_h), 
+            'seq':seq_t_dic.get(seq_h),
             'dest':device_t_dic.get(dest_h[:2]),
             'dest_subid':str(int(dest_h[2:4], 16)),
+            'dest_room':room_t_dic.get(dest_h[2:4]),
             'src':device_t_dic.get(src_h[:2]),
             'src_subid':str(int(src_h[2:4], 16)),
+            'src_room':room_t_dic.get(src_h[2:4]),
             'cmd':cmd if cmd!=None else cmd_h,
             'value':value_h,
-            'time': time.time(),
+            'time':time.time(),
             'flag':None}
     return ret
 
@@ -518,8 +520,8 @@ def packet_processor(p):
         elif p['dest'] == 'light' and p['cmd']=='state':
         #elif p['src'] == 'light' and p['cmd']=='state':
             state = light_parse(p['value'])
-            logtxt='[MQTT publish|light] data[{}]'.format(state)
-            mqttc.publish("kocom/livingroom/light/state", json.dumps(state))
+            logtxt='[MQTT publish|light] room[{}] data[{}]'.format(p['dest_room'], state)
+            mqttc.publish("kocom/{}/light/state".format(p['dest_room']), json.dumps(state))
         elif p['dest'] == 'fan' and p['cmd']=='state':
         #elif p['src'] == 'fan' and p['cmd']=='state':
             state = fan_parse(p['value'])
@@ -639,11 +641,11 @@ def publish_discovery(dev, sub=''):
     elif dev == 'light':
         for num in range(1, int(config.get('User', 'light_count'))+1):
             #ha_topic = 'homeassistant/light/kocom_livingroom_light1/config'
-            topic = 'homeassistant/light/kocom_livingroom_light{}/config'.format(num)
+            topic = 'homeassistant/light/kocom_{}_light{}/config'.format(sub, num)
             payload = {
-                'name': 'Kocom Livingroom Light{}'.format(num),
-                'cmd_t': 'kocom/livingroom/light/{}/command'.format(num),
-                'stat_t': 'kocom/livingroom/light/state',
+                'name': 'Kocom {} Light{}'.format(sub, num),
+                'cmd_t': 'kocom/{}/light/{}/command'.format(sub, num),
+                'stat_t': 'kocom/{}/light/state'.format(sub),
                 'stat_val_tpl': '{{ value_json.light_' + str(num) + ' }}',
                 'pl_on': 'on',
                 'pl_off': 'off',
